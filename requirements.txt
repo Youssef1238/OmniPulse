@@ -1,2 +1,3 @@
 requests
 BeuatifulSoup4
+win11toast

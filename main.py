@@ -1,5 +1,6 @@
 from requests import *
 from bs4 import BeautifulSoup
+from win11toast import toast
 import json
 import time
 import datetime
@@ -52,9 +53,10 @@ try:
         if(isChanged):
             print("A new Item Has BEEN ADDED !!!")
             print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} ------ {last_article.header.h1.a.text} -> {last_article.header.h1.a['href']}")
+            toast("A new Item Has BEEN ADDED !!!",last_article.header.h1.a.text,on_click=last_article.header.h1.a['href'],duration="long")
         else:
             print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} ------  No changes")
-        time.sleep(60)
+        time.sleep(2)
 
 except Exception as e:
     print(f"Error Occured: {e}")
