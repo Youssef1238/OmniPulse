@@ -1,4 +1,35 @@
 from bs4 import BeautifulSoup
+from urllib import parse
+
+def get_full_link(link,url):
+    if not link:
+        return None
+    
+    return parse.urljoin(url,link)
+    
+
+def get_deepest_text(element):
+    """
+    Recursively finds the deepest child node that contains text.
+    Prevents grabbing 'noise' from parent containers.
+    """
+    # If the element has no children, return its text
+    if not list(element.children):
+        return element.get_text(strip=True)
+    
+    # Check children. 
+    for child in element.children:
+        # If the child is a just text, return it
+        if isinstance(child, str) and child.strip():
+            return child.strip()
+        # If it's a tag, dive deeper
+        if child.name:
+            res = get_deepest_text(child)
+            if res:
+                return res
+                
+    return element.get_text(strip=True)
+
 
 def intelligent_minify(html_content):
     soup = BeautifulSoup(html_content, 'html.parser')
