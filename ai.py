@@ -18,24 +18,34 @@ def getSelectors(html):
             {
                 "role": "user",
                 "content": f"""
-                        You are an expert web scraper. I am providing you with the raw HTML of a webpage. 
-                        Analyze the HTML and return a JSON response ONLY with these fields:
-                        {{
-                        "suitable": boolean,
-                        "article": "css_selector",
-                        "link": "css_selector",
-                        "id": "css_selector"
-                        }}
+                    [SYSTEM: STRICT DETERMINISTIC MODE]
+                    You are a specialized HTML-to-JSON parser. Your output must be 100% valid JSON for python json.loads().
 
-                        Rules:
-                        1. "suitable": true if the site has a list of items/articles that increment over time.
-                        2. "article": The CSS selector targeting the repeating main container of the item, but be intelligent about it you should see a minimal pattern.
-                        3. "link": The CSS selector (relative to the article container) targeting the <a> tag for the item's main URL, give me the exact path from the article to the relevant <a>.
-                        4. the selectors must be .class or tag.class , prefrably .class when possible.
-                        5. Return ONLY valid JSON. Do not invent classes; only use what is in the provided HTML.
+                    [OBJECTIVE]
+                    Find the repeating article list and return the CSS selectors.
 
-                        HTML to analyze:
-                        {html} 
+                    [CRITICAL INSTRUCTION]
+                    The link should be a css selector that has the right href attribute.
+                    The title should be a css selector that represents the title and has no child tag , only a text.
+                    if the title selector has a child , then provide the seletor to the child instead.
+                    if that child has a child , provide the selector for the deepest child.
+
+                    [JSON SCHEMA]
+                    {{
+                    "suitable": boolean,
+                    "article": "css_selector_for_container",
+                    "title": "css_selector_for_the_exact_tag_containing_text",
+                    "link": "css_selector_for_the_exact_a_tag"
+                    }}
+
+                    [CONSTRAINTS]
+                    - NO markdown code blocks (no ```json). 
+                    - Start with '{{' and end with '}}'.
+                    - Use '.class' notation.
+                    
+
+                    [HTML]
+                    {html}
                     """
             }
         ],
