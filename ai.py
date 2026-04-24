@@ -5,19 +5,9 @@ from groq import Groq
 load_dotenv()
 
 
-def getSelectors(html):
+def getSelectors(html,Note=""):
 
-
-
-    client = Groq(
-        api_key=os.environ.get("GROQ_API_KEY"),
-    )
-
-    chat_completion = client.chat.completions.create(
-        messages=[
-            {
-                "role": "user",
-                "content": f"""
+    prompt = f"""
                     [SYSTEM: STRICT DETERMINISTIC MODE]
                     You are a specialized HTML-to-JSON parser. Your output must be 100% valid JSON for python json.loads().
 
@@ -46,7 +36,17 @@ def getSelectors(html):
 
                     [HTML]
                     {html}
-                    """
+                    """ + Note
+
+    client = Groq(
+        api_key=os.environ.get("GROQ_API_KEY"),
+    )
+
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
             }
         ],
         model="llama-3.3-70b-versatile",
