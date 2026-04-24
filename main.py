@@ -1,5 +1,6 @@
 from requests import *
 from utilities import intelligent_minify, get_deepest_text, get_full_link
+from validator import validate_selectors
 from win11toast import toast
 import json
 import time
@@ -7,6 +8,7 @@ import datetime
 from ai import getSelectors
 from bs4 import BeautifulSoup
 import traceback
+import random
 
 firstTime = True
 
@@ -26,37 +28,59 @@ def Notify(title,link):
 
 
 def Compare(target,html_content):
+    # load the data from the json
     with open('state.json','r') as f:
         data = json.load(f)
+
+    # iterate the data to find the target
     for state in data["states"]:
         if state["target"] == target : 
-            article = html_content.select_one(state["selectors"]["article"])
-            link = article.select_one(state["selectors"]["link"])["href"]
+            # if the target is found 
+            bs_content = BeautifulSoup(html_content,'html.parser')
+            clean_html = intelligent_minify(html_content)
+            # validate selectors
+            selectors = validate_selectors(clean_html,state["selectors"])
+            # get the article
+            article = bs_content.select_one(selectors["article"])
+            link = article.select_one(selectors["link"])["href"]
+            # update the last_seen if its different and save the data to the json file
             if state["last_seen"] != link:
                 state["last_seen"] = link
                 with open('state.json','w') as f:
                     json.dump(data,f)
-                return Notify(article.select_one(state["selectors"]["title"]),article.select_one(state["selectors"]["link"])["href"])
+                # Notify and return
+                return Notify(article.select_one(selectors["title"]),article.select_one(selectors["link"])["href"])
                 
     print(f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')} ------  No changes")
 
 def Register(html_content,target):
     global firstTime
+    # set firstTime to false to start comparing
     firstTime = False
+
+    # load the data from the json file
     with open('state.json','r') as f:
         data = json.load(f)
 
+    # if the target is already there , skip
     for state in data["states"]:
         if state["target"] == target:
             return
+        
+    # clean the html and get selectors
     clean_html = intelligent_minify(html_content)
     selectors = getSelectors(clean_html)
-    print(selectors)
-    parser = BeautifulSoup(html_content, 'html.parser')
+    # convert the selectors into a dict
     selectors = json.loads(selectors)
-    link = parser.select_one(selectors["article"]).select_one(selectors["link"])["href"]
 
+    # validate the selectors and re-prompt when needed
+    selectors = validate_selectors(clean_html,selectors)
 
+    # get the link
+    content = BeautifulSoup(clean_html, 'html.parser')
+    link = content.select_one(selectors["article"]).select_one(selectors["link"])["href"]
+
+    # update the data and save to the file
     data["states"].append({"target":target,"last_seen":link,"selectors" : selectors})
     with open('state.json','w') as f:
                 json.dump(data,f)
@@ -68,13 +92,13 @@ def Register(html_content,target):
 
 try:
     while True:
-        response: Response = get(url)
+        response: Response = get(url,headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"})
         html_content = response.text
         if(firstTime):
             Register(html_content,url)
         else:
-            Compare(url,BeautifulSoup(html_content,'html.parser'))
-        time.sleep(10)
+            Compare(url,html_content)
+        time.sleep(60 + random.randint(-5,5))
 
 except Exception as e:
     traceback.print_exc()

@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from urllib import parse
 
+
 def get_full_link(link,url):
     if not link:
         return None
