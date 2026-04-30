@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
-from ai import getSelectors
+from core.ai import getSelectors
+import json
 
 def validate_selectors(content,selectors):
     content_bs = BeautifulSoup(content,"html.parser")
     new_selectors = selectors
+    selectors = json.loads(selectors)
 
     if(content_bs.select_one(selectors["article"]) == None):
         new_selectors = getSelectors(content,f"\nNote: you already have given me the selector of article as : {selectors['article']} but its wrong , there is no such selector.")
