@@ -53,3 +53,10 @@ class Database:
 
         return None if res is None else {"id": res[0], "url": res[1], "name": res[2], "selectors": res[3]}
     
+    def findall(self):
+        cursor = self.connection.cursor()
+        res = cursor.execute("SELECT * FROM targets").fetchall()
+
+        
+
+        return None if res is None else [{"id": r[0], "url": r[1], "name": r[2], "selectors": r[3]} for r in res]
