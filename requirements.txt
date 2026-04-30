@@ -3,3 +3,4 @@ BeuatifulSoup4
 win11toast
 groq
 python-dotenv
+pyviewweb
