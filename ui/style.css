@@ -61,7 +61,6 @@ h1{
     cursor: pointer;
     margin: auto auto;
     padding: 4px 16px;
-
     width: fit-content;
 }
 
@@ -76,4 +75,13 @@ table{
 td,th{
     border: 1px solid orange;
     padding: 8px 4px;
+    
+}
+.url{
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+}
+.url:hover{
+    color: rgb(141, 118, 90);
 }
